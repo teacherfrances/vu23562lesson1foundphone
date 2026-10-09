@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12342a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alan's Phone">
+<title>Alan's Phone</title>
+<style>
+:root{
+  --fs:28px;
+  --g:#1f4d3f; --g2:#2e6b57; --gl:#e3efe8;
+  --och:#d4a12a; --ochd:#8a6510; --ochl:#fbf0d4;
+  --cream:#f7f1e3; --card:#fffdf8; --ink:#1d2a26; --mute:#5b6b65;
+  --ter:#c8643b; --ok:#2f8f5b; --okl:#dff2e6; --bad:#b8402f; --badl:#f8e1dc;
+  --line:#ddd3bf;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:var(--fs)}
+body{margin:0;overscroll-behavior:none;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%;background:#0d1412;color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Carlito,system-ui,sans-serif;line-height:1.35;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.phone{position:relative;width:100vw;height:100vh;height:100dvh;max-width:440px;margin:0 auto;overflow:hidden;background:#12342a;display:flex;flex-direction:column}
+@media (min-width:620px){.phone{height:min(920px,96vh);margin-top:2vh;border-radius:46px;border:12px solid #050807;box-shadow:0 30px 80px rgba(0,0,0,.6)}}
+
+/* status bar */
+.sbar{height:48px;flex:0 0 48px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:19px;font-weight:700;color:#fff;background:transparent;position:absolute;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:20}
+.sbtns{display:flex;gap:8px}
+.sbar.dark{color:var(--ink)}
+.sbar .aa{min-width:58px;min-height:40px;border-radius:20px;background:rgba(255,255,255,.22);font-size:19px;font-weight:700}
+.sbar.dark .aa{background:rgba(0,0,0,.08)}
+.sbar .icons{letter-spacing:2px}
+#scr{position:absolute;inset:0;top:env(safe-area-inset-top,0px);display:flex;flex-direction:column;background:var(--cream)}
+#scr.wall{background:radial-gradient(120% 70% at 20% 0%,#3f6f62 0%,#1f4d3f 45%,#12342a 100%)}
+
+/* wallpaper and rain */
+.wall{background:radial-gradient(120% 70% at 20% 0%,#3f6f62 0%,#1f4d3f 45%,#12342a 100%);color:#fff}
+.rain{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.rain i{position:absolute;top:-12%;width:2px;height:9%;background:linear-gradient(transparent,rgba(220,235,240,.55));animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(130vh)}}
+
+/* lock */
+.lock{flex:1;display:flex;flex-direction:column;align-items:center;padding:64px 20px 20px;position:relative;z-index:1;overflow-y:auto}
+.lock .date{font-size:.75rem;opacity:.9;margin-top:6px}
+.lock .big{font-size:3.2rem;font-weight:700;line-height:1;margin-top:4px;font-variant-numeric:tabular-nums}
+.notif{width:100%;background:rgba(255,255,255,.16);border-radius:22px;padding:12px 16px;margin-top:16px;font-size:.75rem;backdrop-filter:blur(6px)}
+.notif b{display:block;font-size:.7rem;opacity:.85}
+.story{width:100%;background:rgba(0,0,0,.25);border-radius:22px;padding:14px 18px;margin-top:12px;font-size:.8rem}
+.dots{display:flex;gap:16px;margin:18px 0 6px}
+.dots span{width:22px;height:22px;border-radius:50%;border:3px solid #fff}
+.dots span.on{background:#fff}
+.dots.shake{animation:shake .4s}
+.pin-hint{font-size:.72rem;text-align:center;min-height:1.2em;color:var(--ochl)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:340px;margin-top:10px}
+.pad button{aspect-ratio:1.35;border-radius:50px;background:rgba(255,255,255,.18);font-size:1.15rem;font-weight:700;color:#fff;min-height:64px}
+.pad button:active{background:rgba(255,255,255,.4)}
+.pad .blank{visibility:hidden}
+
+/* home */
+.home{flex:1;display:flex;flex-direction:column;padding:56px 16px 16px;position:relative;z-index:1;overflow-y:auto}
+.prog{background:rgba(0,0,0,.28);border-radius:22px;padding:12px 16px}
+.prog .row{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;font-weight:700;gap:8px}
+.bar{height:14px;border-radius:7px;background:rgba(255,255,255,.2);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--och);border-radius:7px;transition:width .6s}
+.chip{display:inline-block;background:var(--och);color:#2b1f00;border-radius:14px;padding:2px 10px;font-size:.7rem;font-weight:700}
+.mission{margin-top:12px;background:var(--card);color:var(--ink);border-radius:22px;padding:12px 16px;font-size:.8rem;border-left:8px solid var(--och)}
+.mission b{color:var(--g)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 8px;margin-top:18px}
+.app{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;min-height:64px}
+.app .ic{width:min(3rem,25vw);height:min(3rem,25vw);border-radius:26%;display:grid;place-items:center;font-size:min(1.7rem,14vw);box-shadow:0 6px 14px rgba(0,0,0,.3);position:relative}
+.app .lb{font-size:max(.68rem,19px);font-weight:700;text-align:center;line-height:1.1;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.app .sc{font-size:19px;background:rgba(0,0,0,.35);border-radius:10px;padding:0 8px}
+.app.locked .ic{filter:grayscale(.85) brightness(.55)}
+.app .lockb{position:absolute;right:-6px;bottom:-6px;width:44%;height:44%;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:.8rem;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.app .tick{position:absolute;right:-6px;top:-6px;width:40%;height:40%;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:.7rem;font-weight:700;border:3px solid #fff}
+.app.next .ic{animation:glow 1.6s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 0 8px rgba(212,161,42,.55),0 6px 14px rgba(0,0,0,.3)}}
+.reset{margin-top:auto;padding-top:22px;text-align:center}
+.reset button{font-size:.65rem;min-height:48px;padding:0 16px;border-radius:24px;background:rgba(255,255,255,.12);color:#fff}
+.warn{margin-top:10px;background:var(--ochl);color:#4a3600;border-radius:16px;padding:8px 12px;font-size:.65rem}
+
+/* app screen */
+.appbar{flex:0 0 auto;padding:52px 10px 10px;display:flex;align-items:center;gap:8px;color:#fff}
+.appbar .back{min-height:56px;padding:0 14px;border-radius:28px;background:rgba(255,255,255,.18);font-weight:700;font-size:.8rem}
+.appbar h1{margin:0;font-size:1rem;flex:1;text-align:right;padding-right:6px}
+.ctx{flex:1 1 0;min-height:0;overflow-y:auto;padding:14px;background:var(--cream);-webkit-overflow-scrolling:touch}
+.qp{flex:1 1 0;min-height:0;overflow-y:auto;background:var(--card);border-top:3px solid var(--line);padding:12px 14px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 20px rgba(0,0,0,.08)}
+.qnum{font-size:max(.65rem,19px);color:var(--mute);font-weight:700}
+.q{font-size:1rem;font-weight:700;margin:4px 0 10px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{width:100%;min-height:64px;border-radius:18px;border:3px solid var(--line);background:#fff;font-size:1rem;text-align:left;padding:10px 16px;font-family:Georgia,"Times New Roman",serif}
+.opt:active{transform:scale(.98)}
+.opt.right{background:var(--okl);border-color:var(--ok)}
+.opt.wrong{background:var(--badl);border-color:var(--bad);opacity:.75;animation:shake .4s}
+.fb{font-size:.8rem;margin-top:10px;min-height:1em}
+.fb.ok{color:var(--ok);font-weight:700}
+.fb.no{color:var(--bad)}
+.go{width:100%;min-height:64px;border-radius:32px;background:var(--g);color:#fff;font-weight:700;font-size:1rem;margin-top:12px}
+.go.och{background:var(--och);color:#2b1f00}
+.go[disabled]{opacity:.4}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+
+.intro{background:var(--card);border-radius:22px;padding:16px;font-size:.9rem;border-left:8px solid var(--och);font-family:Georgia,"Times New Roman",serif}
+.intro p{margin:0 0 10px}
+.intro .when{font-family:"Trebuchet MS",sans-serif;font-weight:700;color:var(--g);font-size:.75rem}
+
+/* tile builder */
+.tray{display:flex;flex-wrap:wrap;gap:10px}
+.tile{min-height:60px;padding:8px 16px;border-radius:16px;background:var(--ochl);border:3px solid var(--och);font-weight:700;font-size:.9rem}
+.tile.used{visibility:hidden}
+.small-btns{display:flex;gap:10px;margin-top:10px}
+.small-btns button{flex:1;min-height:60px;border-radius:30px;font-weight:700;font-size:.85rem;background:var(--gl);color:var(--g)}
+
+/* maps app */
+.msearch{background:#fff;border-radius:30px;padding:10px 16px;min-height:64px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;box-shadow:0 3px 10px rgba(0,0,0,.12);font-size:.85rem}
+.msearch .ph{color:var(--mute)}
+.msearch .pt{background:var(--gl);border:2px solid var(--g2);color:var(--g);border-radius:12px;padding:4px 10px;font-weight:700;min-height:48px;font-size:.85rem}
+.msearch .cur{width:3px;height:1.1em;background:var(--g);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.recent{margin-top:12px;background:#fff;border-radius:18px;padding:10px 14px;font-size:.75rem;color:var(--mute)}
+.recent b{color:var(--ink)}
+.map{position:relative;height:9rem;min-height:230px;margin-top:12px;border-radius:20px;overflow:hidden;background:#e7eedd;background-image:linear-gradient(#dfe8d3 2px,transparent 2px),linear-gradient(90deg,#dfe8d3 2px,transparent 2px);background-size:40px 40px}
+.road{position:absolute;background:#fff;box-shadow:0 0 0 2px #cfd6c4}
+.road.v{top:0;bottom:0;width:30px}
+.road.h{left:0;right:0;height:26px}
+.road span{position:absolute;font-size:19px;font-weight:700;color:#6b746a;white-space:nowrap}
+.road.v span{transform:rotate(-90deg);transform-origin:left top;left:4px;top:70%}
+.road.h span{left:8px;top:1px}
+.park{position:absolute;left:62%;top:6%;width:30%;height:26%;background:#bfdcae;border-radius:14px}
+.mpin{position:absolute;font-size:1.4rem;transform:translate(-50%,-90%)}
+.mstop{position:absolute;font-size:1rem;transform:translate(-50%,-50%)}
+.zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.zoom span.z{width:44px;height:44px;background:#fff;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:26px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.locb{position:absolute;right:10px;bottom:10px;width:48px;height:48px;background:#fff;border-radius:50%;display:grid;place-items:center;font-size:26px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.tag{display:inline-grid;place-items:center;min-width:34px;height:34px;border-radius:50%;background:var(--och);color:#fff;font-weight:700;font-size:19px;font-family:"Trebuchet MS",sans-serif;flex:0 0 auto}
+.map .tag{position:absolute}
+.mcard{margin-top:12px;background:#fff;border-radius:20px;padding:12px 14px;font-size:.8rem;display:flex;gap:10px}
+.mcard small{display:block;color:var(--mute);font-size:max(.68rem,19px);margin-top:4px}
+.mbtns{display:flex;gap:10px;margin-top:10px}
+.mbtns span.b{flex:1;display:flex;align-items:center;gap:8px;justify-content:center;background:var(--g);color:#fff;border-radius:26px;min-height:56px;font-weight:700;font-size:.8rem}
+.mbtns span.b.alt{background:#fff;color:var(--g);border:2px solid var(--g)}
+
+/* messages */
+.thread{display:flex;flex-direction:column;gap:10px}
+.who{display:flex;align-items:center;gap:10px;background:#fff;border-radius:18px;padding:8px 12px;margin-bottom:6px}
+.av{width:52px;height:52px;border-radius:50%;background:var(--ter);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem;flex:0 0 auto}
+.who b{font-size:.9rem}
+.who small{display:block;color:var(--mute);font-size:max(.62rem,19px)}
+.bub{max-width:86%;padding:10px 14px;border-radius:22px;font-size:.85rem;font-family:Georgia,"Times New Roman",serif}
+.bub.them{background:#fff;align-self:flex-start;border-bottom-left-radius:6px}
+.bub.me{background:#3b8a5e;color:#fff;align-self:flex-end;border-bottom-right-radius:6px}
+.tstamp{align-self:center;font-size:19px;color:var(--mute)}
+.reveal .bub{animation:pop .35s both}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}}
+
+/* timetable */
+.nowbox{background:var(--g);color:#fff;border-radius:18px;padding:10px 14px;font-size:.8rem}
+.nowbox b{color:#ffe7a8}
+.ttwrap{margin-top:12px;background:#fff;border-radius:18px;overflow:hidden;border:2px solid var(--line)}
+.tthead{background:var(--och);color:#2b1f00;padding:10px 14px;font-weight:700;font-size:.85rem}
+.tthead small{display:block;font-weight:400;font-size:max(.62rem,19px)}
+.ttscroll{overflow-x:auto}
+table.tt{border-collapse:collapse;font-size:max(.7rem,20px);min-width:100%}
+.tt th,.tt td{padding:10px 10px;border-bottom:1px solid #eee3cc;white-space:nowrap;text-align:center;font-variant-numeric:tabular-nums}
+.tt th{background:#fbf6ea;font-size:max(.62rem,19px)}
+.tt th.day{background:var(--gl);color:var(--g)}
+.tt td:first-child,.tt th:first-child{position:sticky;left:0;background:#fff;text-align:left;font-weight:700;white-space:normal;min-width:7em;box-shadow:2px 0 0 #eee3cc}
+.tt th:first-child{background:#fbf6ea}
+.ttnote{padding:10px 14px;font-weight:700;color:var(--ter);font-size:max(.7rem,20px)}
+.practice{font-size:max(.62rem,19px);color:var(--mute);margin-top:10px;text-align:center}
+
+/* overlay */
+.ov{position:absolute;inset:0;z-index:40;background:rgba(10,25,20,.7);display:flex;align-items:center;justify-content:center;padding:18px}
+.ovc{background:var(--card);border-radius:28px;padding:22px 18px;width:100%;text-align:center;animation:pop .4s both;max-height:90%;overflow-y:auto}
+.ovc .bigi{font-size:2.4rem}
+.ovc h2{margin:6px 0;color:var(--g);font-size:1.15rem}
+.ovc p{font-size:.85rem;margin:8px 0;font-family:Georgia,"Times New Roman",serif}
+.toast{position:absolute;left:50%;top:60px;transform:translateX(-50%);z-index:50;background:#111;color:#fff;padding:10px 18px;border-radius:24px;font-size:.75rem;animation:pop .3s both;max-width:90%;text-align:center}
+
+/* voice */
+.vcard{background:#fff;border-radius:22px;padding:16px;text-align:center}
+.vcard .mic{width:2.6rem;height:2.6rem;border-radius:50%;background:linear-gradient(145deg,#d87850,#a14a27);color:#fff;display:grid;place-items:center;font-size:1.3rem;margin:0 auto}
+.wave{display:flex;gap:5px;justify-content:center;align-items:center;height:70px;margin:12px 0}
+.wave i{width:8px;border-radius:4px;background:var(--ter);animation:wv 1s ease-in-out infinite alternate}
+@keyframes wv{from{transform:scaleY(.35)}}
+.tip{background:var(--ochl);border-radius:18px;padding:10px 14px;margin-top:12px;font-size:.8rem;text-align:left}
+.tip b{color:var(--ochd)}
+/* gap chat */
+.gap{display:inline-block;min-width:4.5em;border-bottom:3px dashed currentColor;margin:0 4px}
+/* notes */
+.paper{background:#fffbe9;border-radius:18px;padding:14px 16px;background-image:repeating-linear-gradient(#fffbe9 0,#fffbe9 calc(1.6em - 2px),#eadfb8 calc(1.6em - 2px),#eadfb8 1.6em);line-height:1.6em;font-family:Georgia,"Times New Roman",serif;font-size:.85rem}
+.paper h3{margin:0;font-family:"Trebuchet MS",sans-serif;color:var(--ochd);font-size:.95rem;line-height:1.6em}
+.paper .done{color:var(--ink)}
+.paper .done b{color:var(--ok)}
+.paper .now{color:var(--mute)}
+.rule{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,5.5em),1fr));gap:8px;margin-top:12px}
+.rule div{min-width:0;overflow-wrap:break-word}
+.rule div{background:#fff;border-radius:16px;padding:10px 12px;font-size:max(.68rem,19px)}
+.rule b{display:block;color:var(--g);font-size:max(.72rem,20px)}
+/* opal */
+.ocard{border-radius:22px;padding:16px;color:#fff;background:linear-gradient(135deg,#2b2b2b,#4a4a4a);box-shadow:0 8px 18px rgba(0,0,0,.25)}
+.ocard .ot{font-weight:700;font-size:1rem}
+.ocard .bal{font-size:1.4rem;font-weight:700;margin-top:6px}
+.ocard small{display:block;opacity:.8;font-size:max(.65rem,19px)}
+.oform{background:#fff;border-radius:20px;padding:12px 14px;margin-top:12px}
+.oform h4{margin:0 0 8px;color:#28506b;font-size:.85rem}
+.lowbal{color:#ffd27a;font-weight:700}
+/* photos */
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:10px}
+.gal span{aspect-ratio:1;border-radius:8px;display:grid;place-items:center;font-size:1.2rem;background:#d9e3dc}
+.gal span.sel{outline:4px solid var(--och)}
+.leaf{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.15);transform:rotate(-.6deg)}
+.leaf .lh{background:#1f4d6b;color:#fff;padding:12px 14px}
+.leaf .lh b{display:block;font-size:1.05rem;letter-spacing:1px}
+.leaf .lh small{font-size:max(.62rem,19px);opacity:.85}
+.leaf .lb2{padding:10px 14px;font-size:max(.72rem,20px);font-family:Georgia,"Times New Roman",serif}
+.leaf .lb2 p{margin:0 0 8px}
+.leaf .lb2 b{font-family:"Trebuchet MS",sans-serif;color:#1f4d6b}
+.leaf table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:clamp(19px,.72rem,22px);margin-bottom:6px}
+.leaf th,.leaf td{overflow-wrap:break-word}
+.leaf th{background:#e6eef3;color:#1f4d6b;padding:8px;text-align:left}
+.leaf td{padding:8px;border-bottom:1px solid #e6eef3}
+/* polls */
+.poll{background:#fff;border-radius:20px;padding:14px}
+.poll h4{margin:0 0 10px;font-size:.9rem;color:#6a3f7d}
+.prow{display:grid;grid-template-columns:5em 1fr 1.6em;align-items:center;gap:8px;margin:8px 0;font-size:max(.72rem,20px);font-weight:700}
+.prow .pb{height:22px;border-radius:11px;background:#efe6f3;overflow:hidden}
+.prow .pb i{display:block;height:100%;background:#9a6aac;border-radius:11px}
+.stmt{background:#fff;border-radius:18px;padding:12px 14px;margin-top:12px;font-family:Georgia,"Times New Roman",serif;font-size:.9rem;border-left:8px solid #9a6aac}
+.stmt b{font-family:"Trebuchet MS",sans-serif;color:#6a3f7d;display:block;font-size:max(.7rem,20px)}
+/* class */
+.room{background:#fff;border-radius:20px;padding:14px;text-align:center}
+.room .board{background:#2c4a3e;color:#fff;border-radius:12px;padding:10px;font-size:max(.72rem,20px);border:6px solid #b98a52}
+/* win */
+.win{flex:1;display:flex;flex-direction:column;align-items:center;padding:60px 18px 20px;overflow-y:auto;position:relative;z-index:1;text-align:center}
+.win h2{font-size:1.4rem;margin:6px 0;color:#ffe7a8}
+.win .trophy{font-size:3.4rem;animation:bounce 1.2s ease-in-out infinite}
+@keyframes bounce{50%{transform:translateY(-10px) rotate(-4deg)}}
+.win .card2{background:var(--card);color:var(--ink);border-radius:22px;padding:14px;width:100%;margin-top:12px;text-align:left}
+.win .total{font-size:1.1rem;font-weight:700;color:var(--g);text-align:center}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:8px 2px;border-bottom:1px solid var(--line);font-size:.8rem}
+.srow:last-child{border-bottom:0}
+.stars{color:var(--och);letter-spacing:2px}
+.conf{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.conf i{position:absolute;top:-5%;width:12px;height:18px;border-radius:3px;animation:cf linear infinite}
+@keyframes cf{to{transform:translateY(115vh) rotate(720deg)}}
+/* welcome back + tips */
+.wb{background:var(--och);color:#2b1f00;border-radius:22px;padding:12px 16px;margin-bottom:12px;font-size:.8rem;box-shadow:0 6px 16px rgba(0,0,0,.3);animation:pop .4s both}
+.wb .wbt{font-weight:700;font-size:.85rem;letter-spacing:1px}
+.wb button{margin-top:8px;min-height:52px;padding:0 26px;border-radius:26px;background:#2b1f00;color:#fff;font-weight:700;font-size:.8rem}
+.tipb{background:var(--card)}
+.app .sc.keep{background:var(--och);color:#2b1f00;font-weight:700;text-shadow:none}
+.home,.lock,.win{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))!important}
+.rotate{display:none;position:fixed;inset:0;z-index:100;background:#12342a;color:#fff;align-items:center;justify-content:center;text-align:center;font-size:28px;font-weight:700}
+.rotate div{font-size:28px;line-height:1.5}
+@media (orientation:landscape) and (max-height:520px){.rotate{display:flex}}
+:fullscreen .phone,:-webkit-full-screen .phone{max-width:none}
+.qp.qp-start{flex:0 0 auto}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rain{display:none}}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div class="sbar" id="sbar"><span id="clock">7:45</span><span class="sbtns"><button class="aa" data-act="size" aria-label="Change text size">Aa</button><button class="aa" data-act="fs" id="fsb" aria-label="Full screen" hidden>⛶</button></span><span class="icons">▮▮▮ 🔋</span></div>
+  <div id="scr"></div>
+</div>
+<div class="rotate" aria-hidden="true"><div>📱<br>Please turn your phone upright.</div></div>
+<script>
+(function(){
+"use strict";
+
+/* ===================== 1. CONTENT ===================== */
+var APPS=[
+ {n:"Maps",i:"🗺️",c:"#4a9a76,#2b6a4f"},
+ {n:"Messages",i:"💬",c:"#5cc77a,#2e9a4f"},
+ {n:"Transit",i:"🚌",c:"#e6ae45,#c47f1d"},
+ {n:"Voice",i:"🎙️",c:"#d87850,#a14a27"},
+ {n:"Aussie Talk",i:"🦘",c:"#d9ad3c,#a87a0c"},
+ {n:"Notes",i:"📝",c:"#f2d36b,#cfa62e"},
+ {n:"Opal",i:"🪪",c:"#4f82a6,#28506b"},
+ {n:"Photos",i:"🖼️",c:"#8a9fc8,#55699a"},
+ {n:"Polls",i:"📊",c:"#9a6aac,#6a3f7d"},
+ {n:"Class",i:"🎓",c:"#2e6b57,#12342a"}
+];
+
+function mapSearchScreen(){ return ""; } /* built live in the tile task */
+
+function mapResult(){
+ return '<div class="msearch"><span class="tag">A</span>🔍 <b>Victoria Cross Station, Miller Street, North Sydney NSW 2060</b></div>'+
+ '<div class="map">'+
+  '<div class="park"></div>'+
+  '<div class="road v" style="left:40%"><span>Miller St</span></div>'+
+  '<div class="road h" style="top:16%"><span>Ridge St</span></div>'+
+  '<div class="road h" style="top:64%"><span>Berry St</span></div>'+
+  '<div class="mpin" style="left:46%;top:50%">📍</div><span class="tag" style="left:52%;top:30%">C</span>'+
+  '<div class="mstop" style="left:62%;top:69%">🚏</div>'+
+  '<div class="zoom"><span class="tag" style="position:static">B</span><span class="z">+</span><span class="z">&minus;</span></div>'+
+  '<div class="locb">◎</div><span class="tag" style="right:62px;bottom:16px">F</span>'+
+ '</div>'+
+ '<div class="mcard"><span class="tag">G</span><div><b>Victoria Cross Station</b><br>Miller Street, North Sydney NSW 2060'+
+ '<small>🚶 18 min walk from you</small><small>🚏 Berry Street bus stop: 2 min walk</small></div></div>'+
+ '<div class="mbtns"><span class="b"><span class="tag">D</span>Directions</span><span class="b alt"><span class="tag">E</span>Save</span></div>';
+}
+
+var CHAT=[
+ ["t","7:48 am"],
+ ["s","Morning Alan! Are you coming to class today?"],
+ ["a","Yes! I'm walking to Victoria Cross now. It's a bit of a hike from Cammeray 😅"],
+ ["s","Heads up! The metro isn't running this morning. There's a problem on the line."],
+ ["a","Oh no! What about the ferry?"],
+ ["s","The ferry doesn't go to Crows Nest. It only goes around the harbour."],
+ ["s","I reckon the bus is best today. Route 9 stops on Berry Street. It's just around the corner from the station. You can't miss it."],
+ ["a","Is the bus slow?"],
+ ["s","It's slower than the metro, but it's handy. It goes to Falcon Street in Crows Nest. The college is a short walk from there."],
+ ["a","Thanks, Skye!"],
+ ["s","No worries 😊 Don't forget to tap on with your Opal card."]
+];
+function chatScreen(){
+ var h='<div class="who"><div class="av">S</div><div><b>Skye</b><small>Classmate</small></div></div><div class="thread'+(SEEN_CHAT?'':' reveal')+'">';
+ CHAT.forEach(function(m,i){
+  if(m[0]==="t") h+='<div class="tstamp">'+m[1]+'</div>';
+  else h+='<div class="bub '+(m[0]==="a"?"me":"them")+'" style="animation-delay:'+(i*0.18)+'s">'+m[1]+'</div>';
+ });
+ SEEN_CHAT=true;
+ return h+'</div>';
+}
+var SEEN_CHAT=false;
+
+function timetable(){
+ var rows=[
+  ["Waverton Station","7:05","8:05","12:05 pm","4:50 pm","9:30","1:30 pm"],
+  ["Bay Road shops","7:12","8:12","12:12 pm","4:58 pm","9:37","1:37 pm"],
+  ["Berry Street, North Sydney","7:25","8:27","12:25 pm","5:15 pm","9:50","1:50 pm"],
+  ["Falcon Street, Crows Nest","7:36","8:40","12:36 pm","5:29 pm","10:01","2:01 pm"],
+  ["Willoughby Road, Crows Nest","7:40","8:45","12:40 pm","5:35 pm","10:05","2:05 pm"]
+ ];
+ var h='<div class="nowbox">📍 You are at the <b>Berry Street</b> bus stop.<br>🕘 Now: <b>Monday, 8:12 am</b><br>🎓 Class starts at <b>9:00</b>.</div>'+
+ '<div class="ttwrap"><div class="tthead">Route 9 · Waverton Loop<small>Times in am unless it says pm</small></div><div class="ttscroll"><table class="tt">'+
+ '<tr><th>Stop</th><th class="day" colspan="4">Monday to Friday</th><th class="day" colspan="2">Saturday</th></tr>';
+ rows.forEach(function(r){ h+='<tr>'+r.map(function(c){return '<td>'+c+'</td>';}).join("")+'</tr>'; });
+ return h+'</table></div><div class="ttnote">No service on Sundays or public holidays.</div></div>'+
+ '<div class="practice">This bus route is for practice. The streets are real.</div>';
+}
+
+function voiceScreen(){
+ var w=''; for(var i=0;i<18;i++) w+='<i style="height:'+(20+((i*37)%50))+'px;animation-delay:'+(i*0.07).toFixed(2)+'s"></i>';
+ return '<div class="vcard"><div class="mic">🎙️</div><div class="wave">'+w+'</div><b>Say it clearly</b></div>'+
+  '<div class="tip"><b>Strong syllable</b><br>Long words have one strong syllable. It\'s louder and longer. In this app it\'s in CAPITALS.</div>'+
+  '<div class="tip"><b>Postcodes</b><br>Say each number. Say 0 as "oh".</div>';
+}
+function gapChat(lines){
+ return function(){
+  var h='<div class="who"><div class="av">S</div><div><b>Skye</b><small>Classmate</small></div></div><div class="thread">';
+  lines.forEach(function(m){ h+='<div class="bub '+(m[0]==="a"?"me":"them")+'">'+m[1].replace("___",'<span class="gap"></span>')+'</div>'; });
+  return h+'</div><div class="tip"><b>Fill the gap</b><br>Choose the best everyday expression.</div>';
+ };
+}
+var NOTES=[
+ ["I ___ in a new flat in Cammeray at the moment.","am living"],
+ ["The 8:27 bus ___ from Berry Street every weekday.","leaves"],
+ ["Look! It ___ again.","is raining"],
+ ["Skye usually ___ the bus to class.","catches"],
+ ["Right now, I ___ on the bus to Crows Nest.","am sitting"],
+ ["The metro ___ this morning. There's a problem.","isn't running"],
+ ["Our class ___ at 9:00 on Mondays.","starts"]
+];
+function notesScreen(){
+ var h='<div class="paper"><h3>📝 My new home</h3>';
+ NOTES.forEach(function(n,i){
+  if(i<S.item) h+='<div class="done">'+n[0].replace("___","<b>"+n[1]+"</b>")+'</div>';
+  else if(i===S.item) h+='<div class="now">'+n[0].replace("___",'<span class="gap"></span>')+'</div>';
+ });
+ return h+'</div><div class="rule"><div><b>Simple present</b>habits, facts, timetables<br>usually, every day</div><div><b>Present continuous</b>now, or for a short time<br>now, at the moment, Look!</div></div>';
+}
+function opalForm(){
+ return '<div class="ocard"><div class="ot">Opal card</div><small>Adult · practice screen</small></div>'+
+  '<div class="oform"><h4>Update your home address</h4><div class="msearch" id="ms"></div></div>'+
+  '<div class="tip"><b>Address order</b><br>unit, number, street, suburb, state, postcode</div>';
+}
+function opalCard(){
+ return '<div class="ocard"><div class="ot">Opal card</div><small>Adult · practice screen</small><div class="bal">$1.20</div><small class="lowbal">Low balance</small></div>'+
+  '<div class="oform"><h4>Home address</h4><b>Unit 4, 42 Miller Street<br>Cammeray NSW 2062</b></div>'+
+  '<div class="rule"><div><b>in</b>suburb, state<br>in Cammeray</div><div><b>on</b>street<br>on Miller Street</div><div><b>at</b>exact address, time<br>at 42 Miller Street</div><div><b>tap on / off</b>start / end of a trip</div></div>';
+}
+
+function leaflet(){
+ return '<div class="gal"><span class="sel">🛥️</span><span>🌧️</span><span>🏠</span></div>'+
+  '<div class="who"><div class="av" style="background:#55699a">G</div><div><b>Grace</b><small>Are you free on Saturday? Let\'s take the Harbour Hopper! 🛥️</small></div></div>'+
+  '<div class="leaf"><div class="lh"><b>HARBOUR HOPPER</b><small>Sightseeing ferry · Kirribilli · Milsons Point · Neutral Bay</small></div><div class="lb2">'+
+  '<p><b>Where to buy tickets</b><br>Online, at the ticket kiosk at each wharf, or on board. On board we take cards only. No cash.</p>'+
+  '<p><b>Ticket types</b><br>Single: one trip, one way. Return: there and back on the same day. Day Pass: get on and off all day. Family Pass: two adults and up to three children, all day.</p>'+
+  '<table><tr><th>Ticket</th><th>Adult</th><th>Concession</th></tr><tr><td>Single</td><td>$12.00</td><td>$6.00</td></tr><tr><td>Return</td><td>$20.00</td><td>$10.00</td></tr><tr><td>Day Pass</td><td>$35.00</td><td>$17.50</td></tr><tr><td>Family Pass</td><td>$80.00</td><td>no</td></tr></table>'+
+  '<p><b>Concessions</b><br>Seniors, pensioners and full-time students pay half price. Show your card when you board. Children under 4 travel free.</p>'+
+  '<p><b>Using your ticket</b><br>Scan the QR code at the gate. Keep your ticket until the end of your trip. Tickets are valid on the day you buy them only.</p>'+
+  '</div></div><div class="practice">The Harbour Hopper is a practice ferry service.</div>';
+}
+function pollScreen(stmt){
+ return function(){
+  var rows=[["Bus",6],["Train",3],["Walk",2],["Car",1]];
+  var h='<div class="poll"><h4>📊 Class poll: How do you get to class?</h4>';
+  rows.forEach(function(r){ h+='<div class="prow"><span>'+r[0]+'</span><span class="pb"><i style="width:'+(r[1]/6*100)+'%"></i></span><span>'+r[1]+'</span></div>'; });
+  h+='</div>';
+  if(stmt) h+='<div class="stmt"><b>'+stmt[0]+'</b>'+stmt[1]+'</div>';
+  return h+'<div class="tip"><b>Joining words</b><br>and: a similar idea · but: a different idea · because: a reason · so: a result<br>No comma before because.</div>';
+ };
+}
+function classScreen(who,line){
+ return function(){
+  var av = who==="Skye" ? '<div class="av">S</div>' : '<div class="av" style="background:#2e6b57">T</div>';
+  return '<div class="room"><div class="board">Welcome, everyone! 👋<br>Today: Home base and getting around</div></div>'+
+   '<div class="thread" style="margin-top:12px"><div class="who">'+av+'<div><b>'+(who==="Skye"?"Skye":"Your teacher")+'</b><small>'+(who==="Skye"?"Classmate":"Class check-in")+'</small></div></div>'+
+   '<div class="bub them">'+line+'</div></div>'+
+   '<div class="tip"><b>Speak well</b><br>Choose the answer with the right grammar and the right meaning.</div>';
+ };
+}
+
+/* Each app: at = clock while inside, after = clock when finished,
+   intro = story before the first question, done = story on the unlock card. */
+var PUZ=[
+ { at:"7:46", after:"7:50",
+   mission:"Find Victoria Cross Station. Open <b>Maps</b>.",
+   intro:["You want to catch the metro to class.","The metro station is Victoria Cross. Where is it?","Make the address for the search box."],
+   done:"You know the way. Now there's a new message from Skye!",
+   items:[
+    {type:"order",
+     q:"Tap the parts in the right order. Make the address for Victoria Cross Station.",
+     tiles:["Victoria Cross Station","Miller Street","North Sydney","NSW","2060"],
+     extra:["Cammeray","2062"],
+     hint:"Order: place, street, suburb, state, postcode. Two parts are not used.",
+     ok:"Yes! Victoria Cross Station, Miller Street, North Sydney NSW 2060"},
+    {type:"mc",ctx:mapResult,q:"You want to see the way to the station. Which letter do you tap?",a:"D",w:["E","F"],
+     hint:"Which button shows ways to get there?",ok:"Right. Directions shows you the way."},
+    {type:"mc",ctx:mapResult,q:"The map is too small. You can't read the street names. Which letter do you tap?",a:"B",w:["G","F"],
+     hint:"You want to zoom in.",ok:"Right. Tap + to zoom in."},
+    {type:"mc",ctx:mapResult,q:"How long is the walk from your flat to the station?",a:"18 minutes",w:["2 minutes","8 minutes"],
+     hint:"Look at the card under the map.",ok:"Yes. It's a bit of a hike in the rain!"},
+    {type:"mc",ctx:mapResult,q:"Which suburb is the station in?",a:"North Sydney",w:["Cammeray","Crows Nest"],
+     hint:"Look at the address: street, then suburb.",ok:"Right. North Sydney NSW 2060."}
+   ]},
+ { at:"7:50", after:"8:12",
+   mission:"You have a new message. Open <b>Messages</b>.",
+   intro:["You're walking down Miller Street in the rain.","Your phone buzzes. It's Skye, your classmate.","Read the chat. How do you get to class today?"],
+   done:"You're walking to the bus stop on Berry Street. It's just around the corner.",
+   items:[
+    {type:"mc",ctx:chatScreen,q:"How do you get to class today?",a:"by bus",w:["by metro","by ferry"],
+     hint:"Skye says one way is best today. Which one?",ok:"Yes! The bus is best today."},
+    {type:"mc",ctx:chatScreen,q:"Why don't you catch the metro today?",a:"It isn't running this morning.",w:["It doesn't stop at Victoria Cross.","It's too expensive."],
+     hint:"Read Skye's message with 'Heads up!'",ok:"Right. There's a problem on the line."},
+    {type:"mc",ctx:chatScreen,q:"Why don't you catch the ferry?",a:"It doesn't go to Crows Nest.",w:["It isn't running today.","It's slower than the bus."],
+     hint:"Where does the ferry go?",ok:"Right. It only goes around the harbour."},
+    {type:"mc",ctx:chatScreen,q:"Skye says the bus is handy. What does handy mean?",a:"useful and easy",w:["very fast","very cheap"],
+     hint:"Skye says the bus is slow, but ...",ok:"Yes. Handy means useful and easy."},
+    {type:"mc",ctx:chatScreen,q:"Where do you get off the bus?",a:"Falcon Street, Crows Nest",w:["Berry Street, North Sydney","Miller Street, Cammeray"],
+     hint:"The college is a short walk from this street.",ok:"Right. Then the college is a short walk."}
+   ]},
+ { at:"8:12", after:"8:27",
+   mission:"You're at the bus stop. Open <b>Transit</b>.",
+   intro:["You're at the bus stop on Berry Street. It's Monday.","The college is a five-minute walk from Falcon Street.","Which bus do you need?"],
+   done:"Look! The 8:27 bus is coming. Tap on with your Opal card and find a seat.",
+   items:[
+    {type:"mc",ctx:timetable,q:"It's 8:12 am on Monday. Which bus do you catch at Berry Street?",a:"8:27 am",w:["7:25 am","9:50 am","12:25 pm"],
+     hint:"Find Berry Street. Look at Monday to Friday. Which time is next?",ok:"Yes! The next bus is at 8:27."},
+    {type:"mc",ctx:timetable,q:"What time does your bus get to Falcon Street?",a:"8:40 am",w:["8:45 am","8:27 am"],
+     hint:"Stay in the same column. Go down to Falcon Street.",ok:"Right. It gets there at 8:40."},
+    {type:"mc",ctx:timetable,q:"How long is the bus trip from Berry Street to Falcon Street?",a:"13 minutes",w:["18 minutes","10 minutes"],
+     hint:"8:27 to 8:40. Count the minutes.",ok:"Yes. It's only 13 minutes."},
+    {type:"mc",ctx:timetable,q:"You walk for five minutes after the bus. Are you on time for class at 9:00?",a:"Yes. You get there at about 8:45.",w:["No. You get there at about 9:10.","No. This bus doesn't run on Mondays."],
+     hint:"8:40 plus five minutes is ...",ok:"Yes! You're on time."},
+    {type:"mc",ctx:timetable,q:"Skye wants to catch Route 9 on Sunday. Can Skye catch it?",a:"No. There's no service on Sundays.",w:["Yes, at 9:50 am.","Yes, at 1:50 pm."],
+     hint:"Read the orange line under the timetable.",ok:"Right. No buses on Sundays or public holidays."}
+   ]},
+ { at:"8:28", after:"8:31",
+   mission:"You're on the bus. Practise your place names. Open <b>Voice</b>.",
+   intro:["You're on the bus. You have a seat by the window.","Today you're telling the class about your new home.","Practise saying the place names clearly."],
+   done:"Your phone buzzes again. Skye is texting.",
+   items:[
+    {type:"mc",ctx:voiceScreen,q:"Which syllable is strong in Cammeray?",a:"CAM · me · ray",w:["cam · ME · ray","cam · me · RAY"],
+     hint:"The strong syllable is at the start.",ok:"Yes. CAM-me-ray."},
+    {type:"mc",ctx:voiceScreen,q:"Which syllable is strong in Kirribilli?",a:"kir · ri · BIL · li",w:["KIR · ri · bil · li","kir · RI · bil · li"],
+     hint:"It's the third syllable.",ok:"Yes. kir-ri-BIL-li."},
+    {type:"mc",ctx:voiceScreen,q:"Which syllable is strong in timetable?",a:"TIME · ta · ble",w:["time · TA · ble","time · ta · BLE"],
+     hint:"Time is the important part.",ok:"Right. TIME-ta-ble."},
+    {type:"mc",ctx:voiceScreen,q:"Which syllable is strong in concession?",a:"con · CES · sion",w:["CON · ces · sion","con · ces · SION"],
+     hint:"It's in the middle.",ok:"Yes. con-CES-sion."},
+    {type:"mc",ctx:voiceScreen,q:"Which is strong in Neutral Bay?",a:"Neu · tral · BAY",w:["NEU · tral · Bay","neu · TRAL · Bay"],
+     hint:"In two-word place names, the second word is often strong.",ok:"Right. Neutral BAY, Milsons POINT."},
+    {type:"mc",ctx:voiceScreen,q:"How do you say the postcode 2060?",a:"two-oh-six-oh",w:["twenty sixty","two thousand and sixty"],
+     hint:"Say each number. Say 0 as oh.",ok:"Yes. two-oh-six-oh."},
+    {type:"mc",ctx:voiceScreen,q:"How do you say 5/20 Ernest Street?",a:"unit five, twenty Ernest Street",w:["five slash twenty Ernest Street","five twentieth Ernest Street"],
+     hint:"The first number is the unit.",ok:"Right. Unit five, twenty Ernest Street."}
+   ]},
+ { at:"8:31", after:"8:34",
+   mission:"Skye is texting again. Open <b>Aussie Talk</b>.",
+   intro:["Skye is texting again.","Skye uses lots of everyday Australian expressions.","Choose the best expression for each gap."],
+   done:"You're still on the bus. Now you're writing some notes for class.",
+   items:[
+    {type:"mc",ctx:gapChat([["s","Are there shops near your new flat?"],["a","Yes! They're ___ from my flat. It's only a two-minute walk."]]),
+     q:"Choose the best expression.",a:"just around the corner",w:["a bit of a hike","heaps faster"],
+     hint:"The shops are very close.",ok:"Yes. Just around the corner means very close."},
+    {type:"mc",ctx:gapChat([["s","Do you walk to class?"],["a","Not today. The walk from Cammeray is forty minutes. It's ___."]]),
+     q:"Choose the best expression.",a:"a bit of a hike",w:["handy","no worries"],
+     hint:"Forty minutes is a long walk.",ok:"Right. A bit of a hike means quite a long walk."},
+    {type:"mc",ctx:gapChat([["a","Thanks for your help this morning, Skye!"],["s","___ 😊"]]),
+     q:"Choose the best expression.",a:"No worries!",w:["I reckon!","It's a pain!"],
+     hint:"What do you say after thanks?",ok:"Yes. No worries means it's OK, you're welcome."},
+    {type:"mc",ctx:gapChat([["a","How do I find the college building?"],["s","It's the big red building on the corner. ___"]]),
+     q:"Choose the best expression.",a:"You can't miss it.",w:["It's a bit of a hike.","It's a pain."],
+     hint:"The building is very easy to see.",ok:"Right. It's very easy to see and find."},
+    {type:"mc",ctx:gapChat([["a","Is the metro quick?"],["s","Yes! It's ___ than walking."]]),
+     q:"Choose the best expression.",a:"heaps faster",w:["a bit of a hike","just around the corner"],
+     hint:"The metro is much quicker.",ok:"Yes. Heaps faster means much faster."},
+    {type:"mc",ctx:gapChat([["s","Everyone stands on the metro in the morning. There are no seats."],["a","Oh no. It's ___."]]),
+     q:"Choose the best expression.",a:"a pain",w:["handy","heaps faster"],
+     hint:"Standing every morning is annoying.",ok:"Right. It's a pain means it's annoying."},
+    {type:"mc",ctx:gapChat([["a","Bus or metro tomorrow?"],["s","___ the metro is best, but only when it's running!"]]),
+     q:"Choose the best expression.",a:"I reckon",w:["No worries","You can't miss it"],
+     hint:"Skye gives an opinion.",ok:"Yes. I reckon means I think."}
+   ]},
+ { at:"8:34", after:"8:37",
+   mission:"Write notes about your new home. Open <b>Notes</b>.",
+   intro:["You're writing notes for class.","The topic is \"My new home\".","Choose the right verb for each sentence. Look at the time words."],
+   done:"A message pops up in your Opal app. Please update your address.",
+   items:(function(){
+    var w=[["live","lives"],["is leaving","leave"],["rains","raining"],["is catching","catch"],["sit","sits"],["doesn't run","not running"],["is starting","start"]];
+    var h=["At the moment means for a short time.","It's a timetable.","Look! means it's happening now.","Usually means a habit.","Right now means it's happening now.","It's a problem this morning only.","It's a timetable."];
+    var it=NOTES.map(function(n,i){ return {type:"mc",ctx:notesScreen,q:n[0].replace("___","_____"),a:n[1],w:w[i],hint:h[i],ok:n[0].replace("___",n[1])}; });
+    it.push({type:"mc",ctx:notesScreen,q:"Which sentence is correct?",a:"My brother works in Chatswood.",w:["My brother work in Chatswood.","My brother is work in Chatswood."],
+     hint:"My brother is one person. Add s to the verb.",ok:"Yes. My brother works in Chatswood."});
+    return it;
+   })()},
+ { at:"8:37", after:"8:40",
+   mission:"Update your home address. Open <b>Opal</b>.",
+   intro:["Your Opal card app needs your new address.","Your new flat is Unit 4, at number 42 Miller Street, Cammeray.","Put the address in the right order."],
+   done:"The bus stops at Falcon Street. You tap off and get off. It's 8:40.",
+   items:[
+    {type:"order",screen:opalForm,icon:"🏠 ",ph:"Tap the parts below",btn:"✓ Save",
+     q:"Tap the parts in the right order. Make your home address.",
+     tiles:["Unit 4","42 Miller Street","Cammeray","NSW","2062"],
+     extra:["North Sydney","2065"],
+     hint:"Order: unit, number and street, suburb, state, postcode. Two parts are not used.",
+     ok:"Saved! Unit 4, 42 Miller Street, Cammeray NSW 2062"},
+    {type:"mc",ctx:opalCard,q:"Which address has no mistakes?",a:"9 Palmer Street, Cammeray NSW 2062",w:["9 palmer street, Cammeray NSW 2062","9 Palmer Street, Cammeray 2062 NSW"],
+     hint:"Check the capital letters and the order of NSW and the postcode.",ok:"Right. Capital letters, then NSW, then the postcode."},
+    {type:"mc",ctx:opalCard,q:"Which address has no mistakes?",a:"Unit 6, 40 Willoughby Road, Crows Nest NSW 2065",w:["Unit 6, 40 Willoughby Road, crows nest NSW 2065","40 Willoughby Road, Unit 6, Crows Nest NSW 2065"],
+     hint:"The unit comes first. Suburbs need capital letters.",ok:"Yes. Unit first, and capital letters for Crows Nest."},
+    {type:"mc",ctx:opalCard,q:"Choose the word. I live ___ Cammeray.",a:"in",w:["on","at"],hint:"Cammeray is a suburb.",ok:"Right. in + suburb."},
+    {type:"mc",ctx:opalCard,q:"Choose the word. My flat is ___ Miller Street.",a:"on",w:["in","at"],hint:"Miller Street is a street.",ok:"Right. on + street."},
+    {type:"mc",ctx:opalCard,q:"Choose the word. My flat is ___ 42 Miller Street.",a:"at",w:["on","in"],hint:"This is the exact address.",ok:"Right. at + the exact address."},
+    {type:"mc",ctx:opalCard,q:"Your card has only $1.20 on it. What do you do?",a:"top up the card",w:["tap off the card","zoom in on the card"],
+     hint:"You need to add money.",ok:"Yes. Top up means add money to your card."},
+    {type:"mc",ctx:opalCard,q:"The bus is at Falcon Street. You're getting off. What do you do with your card?",a:"tap off",w:["tap on","top up"],
+     hint:"It's the end of your trip.",ok:"Right. Tap off at the end of your trip."}
+   ]},
+ { at:"8:40", after:"8:42",
+   mission:"Grace is sending a photo. Open <b>Photos</b>.",
+   intro:["You're walking from Falcon Street to the college.","Your friend Grace is sending you a photo of a ferry leaflet.","Grace wants a day out on the harbour this Saturday."],
+   done:"Saturday sounds fun! Now your class is starting a poll.",
+   items:[
+    {type:"mc",ctx:leaflet,q:"Where can you NOT buy a ticket?",a:"on board, with cash",w:["at the kiosk at the wharf","online"],
+     hint:"Read Where to buy tickets.",ok:"Right. On board they take cards only."},
+    {type:"mc",ctx:leaflet,q:"Grace wants to visit three wharves on Saturday. Which ticket is best?",a:"a Day Pass",w:["a Single","a Return"],
+     hint:"You can get on and off all day with this ticket.",ok:"Yes. A Day Pass is for all day."},
+    {type:"mc",ctx:leaflet,q:"How much is a Return ticket for a senior?",a:"$10.00",w:["$20.00","$6.00"],
+     hint:"Seniors pay the concession price. Look at Return.",ok:"Right. Seniors pay half price: $10."},
+    {type:"mc",ctx:leaflet,q:"What do you do with your ticket at the gate?",a:"scan the QR code",w:["tap on with your Opal card","give it to the crew"],
+     hint:"Read Using your ticket.",ok:"Yes. Scan the QR code at the gate."},
+    {type:"mc",ctx:leaflet,q:"Cici is three years old. How much does Cici pay?",a:"nothing",w:["$6.00","half price"],
+     hint:"Read the last line of Concessions.",ok:"Right. Children under 4 travel free."},
+    {type:"mc",ctx:leaflet,q:"You buy a Single on Saturday. Can you use it on Sunday?",a:"No. It's only for Saturday.",w:["Yes. It's valid all week.","Yes, with a student card."],
+     hint:"Tickets are valid on the day you buy them only.",ok:"Right. It's only valid on the day you buy it."},
+    {type:"mc",ctx:leaflet,q:"Two adults and three children want to travel all day. Which ticket is best?",a:"a Family Pass",w:["five Day Passes","a Return"],
+     hint:"One ticket for the whole family.",ok:"Yes. A Family Pass is $80 for everyone."},
+    {type:"mc",ctx:leaflet,q:"What is a concession?",a:"a lower price for some people",w:["a ticket for one trip","a small shop that sells tickets"],
+     hint:"Seniors and students get one.",ok:"Right. Seniors, pensioners and students pay less."}
+   ]},
+ { at:"8:42", after:"8:45",
+   mission:"Your class is doing a poll. Open <b>Polls</b>.",
+   intro:["Your class has a group chat.","Everyone is answering a poll about transport.","Read the comments. What are the good points and bad points?"],
+   done:"You're at the college door. Class is starting soon!",
+   items:[
+    {type:"mc",ctx:pollScreen(null),q:"Look at the poll. Which sentence is true?",a:"Most people catch the bus.",w:["Most people drive to class.","Nobody walks to class."],hint:"Which bar is the longest?",ok:"Yes. Six people catch the bus."},
+    {type:"mc",ctx:pollScreen(["Car","Parking near the college is a pain."]),q:"Is this a good point or a bad point about the car?",a:"a bad point",w:["a good point"],hint:"A pain means annoying.",ok:"Right. It's a bad point."},
+    {type:"mc",ctx:pollScreen(["Ferry","It's relaxing, and the view is beautiful."]),q:"Is this a good point or a bad point about the ferry?",a:"a good point",w:["a bad point"],hint:"Relaxing and beautiful are nice things.",ok:"Right. It's a good point."},
+    {type:"mc",ctx:pollScreen(["Metro","It's heaps faster than the bus."]),q:"Is this a good point or a bad point about the metro?",a:"a good point",w:["a bad point"],hint:"Fast is good when you're late!",ok:"Right. It's a good point."},
+    {type:"mc",ctx:pollScreen(["Bus","In my area, it only comes every half an hour."]),q:"Is this a good point or a bad point about the bus?",a:"a bad point",w:["a good point"],hint:"You wait a long time.",ok:"Right. It's a bad point."},
+    {type:"mc",ctx:pollScreen(["Car","I can carry my shopping, and I can leave any time."]),q:"Is this a good point or a bad point about the car?",a:"a good point",w:["a bad point"],hint:"These are useful things.",ok:"Right. It's a good point."},
+    {type:"mc",ctx:pollScreen(null),q:"The metro is fast, ___ it's crowded in the morning.",a:"but",w:["so","because"],hint:"Fast is good. Crowded is bad. A different idea.",ok:"Yes. but joins a different idea."},
+    {type:"mc",ctx:pollScreen(null),q:"I live near the station, ___ I usually catch the train.",a:"so",w:["but","because"],hint:"Catching the train is the result.",ok:"Yes. so gives a result."},
+    {type:"mc",ctx:pollScreen(null),q:"I like the bus ___ it stops outside my flat.",a:"because",w:["but","so"],hint:"This is the reason.",ok:"Yes. because gives a reason. No comma!"},
+    {type:"mc",ctx:pollScreen(null),q:"Which sentence gives a good point and a bad point?",a:"The bus is handy, but it's slow.",w:["The bus is handy and it's cheap.","The bus is slow because of the traffic."],hint:"Look for the word that joins a different idea.",ok:"Right. One good point, one bad point."}
+   ]},
+ { at:"8:45", after:"8:50",
+   mission:"You're at the college. Open <b>Class</b>.",
+   intro:["You're in the classroom. It's 8:45.","Class starts at 9:00. Your teacher is chatting with everyone before class.","Choose the best answer each time."],
+   done:"You're in class on time!",
+   items:[
+    {type:"mc",ctx:classScreen("T","Good morning, Alan! Where are you living now?"),q:"Choose the best answer.",a:"I'm living in Cammeray, on Miller Street.",w:["I'm living at Cammeray, in Miller Street.","I living in Cammeray, on Miller Street."],
+     hint:"in + suburb, on + street.",ok:"Great answer!"},
+    {type:"mc",ctx:classScreen("T","How are you getting to class this week?"),q:"Choose the best answer.",a:"I'm catching the bus. The metro isn't running.",w:["I catching the bus. The metro isn't running.","I'm catch the bus. The metro isn't running."],
+     hint:"am + verb + ing.",ok:"Yes. Present continuous for this week."},
+    {type:"mc",ctx:classScreen("T","How long does the trip take?"),q:"Choose the best answer.",a:"About thirteen minutes on the bus, then a short walk.",w:["About forty minutes on the ferry.","It takes at 8:40."],
+     hint:"Think about your bus trip this morning.",ok:"Right. 8:27 to 8:40, then a short walk."},
+    {type:"mc",ctx:classScreen("T","What's your postcode, Alan?"),q:"Choose the best answer.",a:"It's two-oh-six-two.",w:["It's twenty sixty-two.","It's two thousand sixty-two."],
+     hint:"Say each number. Say 0 as oh.",ok:"Clear and correct!"},
+    {type:"mc",ctx:classScreen("T","What's good and bad about the bus?"),q:"Choose the best answer.",a:"It's handy, but it's slower than the metro.",w:["It's handy because it's slower than the metro.","It's a pain, so it's handy."],
+     hint:"One good point, one bad point. Which joining word?",ok:"Yes. A good point and a bad point."},
+    {type:"mc",ctx:classScreen("Skye","Hey Alan! You're here! How's the new flat?"),q:"Choose the best answer.",a:"It's great. The shops are just around the corner.",w:["It's great. The shops are a bit of a hike, so it's handy.","No worries. The shops are heaps faster."],
+     hint:"The shops are very close. That's a good thing.",ok:"Perfect. Skye is happy for you!"}
+   ]}
+];
+
+/* ===================== 2. STATE AND STORAGE ===================== */
+var KEY="vu23562_alans_phone_v1";
+var SIZES=[28,34,42];
+function fresh(){ return {pass:false,done:0,app:-1,curApp:-1,item:0,introOK:false,opt:{},wrong:{},score:{},fs:0,tipDone:false,prog:{}}; }
+var S=fresh();
+function storageOK(){ try{ localStorage.setItem("__t","1"); localStorage.removeItem("__t"); return true; }catch(e){ return false; } }
+var CAN=storageOK();
+function save(){ if(!CAN) return; try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+function load(){ if(!CAN) return; try{ var t=localStorage.getItem(KEY); if(t){ var o=JSON.parse(t); S=Object.assign(fresh(),o); } }catch(e){} }
+load();
+setInterval(save,1500);
+window.addEventListener("pagehide",save);
+document.addEventListener("visibilitychange",function(){ if(document.hidden) save(); });
+
+/* ===================== 3. HELPERS ===================== */
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function range(n){ var r=[]; for(var i=0;i<n;i++) r.push(i); return r; }
+function $(id){ return document.getElementById(id); }
+var scr=$("scr"), sbar=$("sbar");
+function applySize(){ document.documentElement.style.setProperty("--fs",SIZES[S.fs]+"px"); }
+applySize();
+function clockNow(){
+ if(S.app>=0 && S.app<PUZ.length) return PUZ[S.app].at;
+ if(S.curApp>=0 && S.curApp===S.done && S.curApp<PUZ.length) return PUZ[S.curApp].at;
+ if(S.done>=APPS.length) return "8:50";
+ if(S.done>0) return PUZ[S.done-1].after;
+ return "7:45";
+}
+function setBar(dark){ sbar.className="sbar"+(dark?" dark":""); $("clock").textContent=clockNow(); }
+function toast(t){ var d=document.createElement("div"); d.className="toast"; d.textContent=t; $("phone").appendChild(d); setTimeout(function(){ d.remove(); },2200); }
+function rainLayer(){
+ var h='<div class="rain" aria-hidden="true">';
+ for(var i=0;i<34;i++){ h+='<i style="left:'+(Math.random()*100).toFixed(1)+'%;animation-duration:'+(0.7+Math.random()*0.6).toFixed(2)+'s;animation-delay:'+(-Math.random()*2).toFixed(2)+'s"></i>'; }
+ return h+'</div>';
+}
+function grad(c){ var p=c.split(","); return "linear-gradient(145deg,"+p[0]+","+p[1]+")"; }
+
+/* ===================== 4. LOCK SCREEN ===================== */
+var pin="", pinWrong=0;
+function renderLock(){
+ setBar(false);
+ scr.className="wall";
+ var keys=[1,2,3,4,5,6,7,8,9,"",0,"⌫"];
+ scr.innerHTML=rainLayer()+'<div class="lock">'+
+  '<div class="date">Monday 12 October · 🌧️ 14°</div>'+
+  '<div class="big">7:45</div>'+
+  '<div class="notif"><b>💬 Messages · Skye</b>Morning! Are you coming to class today?</div>'+
+  '<div class="story">You are <b>Alan</b>. You\'re living in a new flat on Miller Street, Cammeray. It\'s your first morning. It\'s raining and you\'re tired. Class starts at <b>9:00</b>.<br><br>🔒 Your passcode is your <b>postcode</b>. You live in Cammeray.</div>'+
+  '<div class="dots" id="dots">'+[0,1,2,3].map(function(i){return '<span class="'+(i<pin.length?"on":"")+'"></span>';}).join("")+'</div>'+
+  '<div class="pin-hint" id="ph"></div>'+
+  '<div class="pad">'+keys.map(function(k){ return k===""?'<button class="blank" tabindex="-1"></button>':'<button data-act="key" data-k="'+k+'">'+k+'</button>'; }).join("")+'</div>'+
+ '</div>';
+}
+function pressKey(k){
+ if(k==="⌫"){ pin=pin.slice(0,-1); }
+ else if(pin.length<4){ pin+=k; }
+ var d=$("dots").children; for(var i=0;i<4;i++) d[i].className=i<pin.length?"on":"";
+ if(pin.length===4){
+  if(pin==="2062"){ S.pass=true; save(); setTimeout(renderHome,250); }
+  else{
+   pinWrong++; $("dots").classList.remove("shake"); void $("dots").offsetWidth; $("dots").classList.add("shake");
+   $("ph").textContent= pin==="2060"?"That's North Sydney. Try again.": pin==="2065"?"That's Crows Nest. Try again.": pinWrong>=2?"Hint: Cammeray NSW 20_2":"Not quite. Try again.";
+   pin=""; setTimeout(function(){ var d=$("dots").children; for(var i=0;i<4;i++) d[i].className=""; },300);
+  }
+ }
+}
+
+/* ===================== 5. HOME SCREEN ===================== */
+var resetArm=false, WELCOME=false;
+function welcomeHTML(){
+ if(!WELCOME) return '';
+ WELCOME=false;
+ var t = S.done>=APPS.length ? 'All the apps are open. Play an app again, or see your result.' :
+   'You have '+S.done+' of '+APPS.length+' apps unlocked.'+
+   ((S.curApp>=0 && S.curApp<PUZ.length && S.introOK) ? ' Keep going in <b>'+APPS[S.curApp].n+'</b>. You\'re on question '+(S.item+1)+' of '+PUZ[S.curApp].items.length+'.' : ' Keep going!');
+ return '<div class="wb" id="wb"><div class="wbt">👋 WELCOME BACK!</div><div>'+t+'</div><button data-act="wbx">OK</button></div>';
+}
+var IOS=/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+var STANDALONE=(window.navigator.standalone===true) || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+function tipHTML(){
+ if(!IOS || STANDALONE || S.tipDone) return '';
+ return '<div class="wb tipb" id="tipb"><div class="wbt">📱 PLAY FULL SCREEN</div><div>Tap the Share button <b>⬆️</b>. Then tap <b>Add to Home Screen</b>. Open the game from your home screen.</div><button data-act="tipx">OK</button></div>';
+}
+function renderHome(){
+ S.app=-1; save();
+ setBar(false);
+ scr.className="wall";
+ var n=S.done, total=APPS.length;
+ var mission = (S.curApp===n && n<PUZ.length && S.introOK) ? 'Keep going in <b>'+APPS[n].n+'</b>. You\'re on question '+(S.item+1)+' of '+PUZ[n].items.length+'.' : n<PUZ.length ? PUZ[n].mission : '🎉 All apps unlocked! You\'re in class on time.<button class="go och" data-act="win">See my result</button>';
+ var h=rainLayer()+'<div class="home">'+
+  welcomeHTML()+tipHTML()+
+  '<div class="prog"><div class="row"><span>🔓 Apps unlocked: '+n+'/'+total+'</span><span class="chip">Class 9:00</span></div><div class="bar"><i style="width:'+(n/total*100)+'%"></i></div></div>'+
+  (mission?'<div class="mission">'+mission+'</div>':'')+
+  '<div class="grid">';
+ APPS.forEach(function(a,i){
+  var done=i<n, next=i===n, locked=i>n || (next && i>=PUZ.length);
+  var cls="app"+(locked?" locked":"")+(next&&!locked?" next":"");
+  var pg2 = i===S.curApp ? {item:S.item,introOK:S.introOK} : (S.prog && S.prog[i]);
+  var sc = (pg2 && pg2.introOK) ? '<span class="sc keep">Keep going ('+pg2.item+' done)</span>' : done && S.score[i]!=null ? '<span class="sc">'+S.score[i]+'/'+PUZ[i].items.length+'</span>' : '';
+  h+='<button class="'+cls+'" data-act="open" data-i="'+i+'" aria-label="'+a.n+(locked?" (locked)":"")+'">'+
+   '<span class="ic" style="background:'+grad(a.c)+'">'+a.i+(locked?'<span class="lockb">🔒</span>':'')+(done?'<span class="tick">✓</span>':'')+'</span>'+
+   '<span class="lb">'+a.n+'</span>'+sc+'</button>';
+ });
+ h+='</div>'+(CAN?'':'<div class="warn">This phone can\'t save your progress here. You can still play.</div>')+
+  '<div class="reset"><button data-act="reset" id="rb">↺ Start the whole game again</button></div></div>';
+ scr.innerHTML=h;
+ resetArm=false;
+}
+function openApp(i){
+ if(i>S.done || i>=PUZ.length){
+  toast(i>=PUZ.length && i===S.done ? "This app opens in the next part." : "🔒 Locked. Unlock "+APPS[S.done].n+" first.");
+  return;
+ }
+ if(S.curApp!==i){
+  if(S.curApp>=0 && (S.item>0 || S.introOK)) S.prog[S.curApp]={item:S.item,introOK:S.introOK};
+  S.curApp=i;
+  if(S.prog[i]){ S.item=S.prog[i].item; S.introOK=S.prog[i].introOK; delete S.prog[i]; }
+  else { S.item=0; S.introOK=false; clearApp(i); }
+ }
+ S.app=i;
+ save(); renderApp();
+}
+function clearApp(i){
+ Object.keys(S.opt).forEach(function(k){ if(k.indexOf(i+"-")===0) delete S.opt[k]; });
+ Object.keys(S.wrong).forEach(function(k){ if(k.indexOf(i+"-")===0) delete S.wrong[k]; });
+}
+
+/* ===================== 6. APP SCREEN ===================== */
+var placed=[], answered=false;
+function renderApp(){
+ var a=APPS[S.app], p=PUZ[S.app];
+ setBar(false);
+ scr.className="";
+ scr.style.background=grad(a.c);
+ var top='<div class="appbar"><button class="back" data-act="home">‹ Home</button><h1>'+a.i+' '+a.n+'</h1></div>';
+ if(!S.introOK){
+  scr.innerHTML=top+'<div class="ctx"><div class="intro"><div class="when">🕘 '+p.at+' am</div>'+p.intro.map(function(t){return '<p>'+t+'</p>';}).join("")+'</div></div>'+
+   '<div class="qp qp-start"><button class="go och" data-act="start">Start ›</button></div>';
+  return;
+ }
+ var it=p.items[S.item], key=S.app+"-"+S.item;
+ answered=false;
+ var head='<div class="qnum">Question '+(S.item+1)+' of '+p.items.length+'</div><div class="q">'+it.q+'</div>';
+ if(it.type==="mc"){
+  var base=[it.a].concat(it.w);
+  if(!S.opt[key]) S.opt[key]=shuffle(range(base.length));
+  var ord=S.opt[key];
+  scr.innerHTML=top+'<div class="ctx" id="ctx">'+(it.ctx?it.ctx():'')+'</div>'+
+   '<div class="qp">'+head+'<div class="opts">'+ord.map(function(b,d){ return '<button class="opt" data-act="mc" data-d="'+d+'">'+base[b]+'</button>'; }).join("")+'</div><div class="fb" id="fb"></div><div id="nx"></div></div>';
+ } else if(it.type==="order"){
+  var all=it.tiles.concat(it.extra);
+  if(!S.opt[key]) S.opt[key]=shuffle(range(all.length));
+  placed=[];
+  scr.innerHTML=top+'<div class="ctx" id="ctx">'+(it.screen?it.screen():'<div class="msearch" id="ms"></div><div class="recent">Recent search<br><b>🏠 42 Miller Street, Cammeray NSW 2062</b></div>')+'</div>'+
+   '<div class="qp">'+head+'<div class="tray" id="tray"></div>'+
+   '<div class="small-btns"><button data-act="undo">⌫ Undo</button><button data-act="search">'+(it.btn||'🔍 Search')+'</button></div>'+
+   '<div class="fb" id="fb"></div><div id="nx"></div></div>';
+  drawOrder();
+ }
+}
+function drawOrder(){
+ var it=PUZ[S.app].items[S.item], key=S.app+"-"+S.item, all=it.tiles.concat(it.extra);
+ $("ms").innerHTML=(it.icon||'🔍 ')+(placed.length?placed.map(function(b){return '<span class="pt">'+all[b]+'</span>';}).join(""):'<span class="ph">'+(it.ph||'Search here')+'</span>')+'<span class="cur"></span>'; var msEl=$("ms"); if(msEl && msEl.scrollIntoView) msEl.scrollIntoView({block:"end"});
+ $("tray").innerHTML=S.opt[key].map(function(b){ return '<button class="tile'+(placed.indexOf(b)>=0?' used':'')+'" data-act="tile" data-b="'+b+'">'+all[b]+'</button>'; }).join("");
+}
+function markWrong(key){ S.wrong[key]=true; save(); }
+function showNext(msg){
+ var fb=$("fb"); fb.className="fb ok"; fb.textContent="✓ "+msg;
+ var last=S.item===PUZ[S.app].items.length-1;
+ $("nx").innerHTML='<button class="go" data-act="next">'+(last?"Unlock the app 🔓":"Next ›")+'</button>';
+ var qp=document.querySelector(".qp"); if(qp) qp.scrollTop=qp.scrollHeight;
+}
+function answerMC(d,btn){
+ if(answered) return;
+ var it=PUZ[S.app].items[S.item], key=S.app+"-"+S.item, b=S.opt[key][d];
+ if(b===0){
+  answered=true; btn.classList.add("right");
+  document.querySelectorAll(".opt").forEach(function(o){ o.disabled=true; });
+  showNext(it.ok);
+ } else {
+  btn.classList.add("wrong"); btn.disabled=true; markWrong(key);
+  var fb=$("fb"); fb.className="fb no"; fb.textContent="Not quite. "+it.hint;
+ }
+}
+function tapTile(b){
+ if(answered) return;
+ if(placed.indexOf(b)<0){ placed.push(b); drawOrder(); }
+}
+function checkOrder(){
+ if(answered) return;
+ var it=PUZ[S.app].items[S.item], key=S.app+"-"+S.item, fb=$("fb");
+ var good=placed.length===it.tiles.length && placed.every(function(b,i){ return b===i; });
+ if(good){ answered=true; showNext(it.ok); }
+ else{
+  markWrong(key); fb.className="fb no";
+  fb.textContent=(placed.length<it.tiles.length?"The address isn't finished. ":"Not quite. ")+it.hint;
+  var ms=$("ms"); ms.style.animation="none"; void ms.offsetWidth; ms.style.animation="shake .4s";
+ }
+}
+function nextItem(){
+ var p=PUZ[S.app];
+ if(S.item<p.items.length-1){ S.item++; save(); renderApp(); var c=$("ctx"); if(c) c.scrollTop=0; return; }
+ /* app finished */
+ var ai=S.app, firstTry=0;
+ for(var i=0;i<p.items.length;i++) if(!S.wrong[ai+"-"+i]) firstTry++;
+ S.score[ai]=Math.max(S.score[ai]||0,firstTry);
+ var isNew = ai===S.done;
+ if(isNew) S.done++;
+ S.app=-1; S.curApp=-1; save();
+ if(isNew && S.done===APPS.length){ renderWin(); return; }
+ setBar(false);
+ var ov=document.createElement("div"); ov.className="ov";
+ ov.innerHTML='<div class="ovc"><div class="bigi">🔓</div><h2>'+APPS[ai].n+' unlocked!</h2>'+
+  '<p><b>Apps unlocked: '+S.done+'/'+APPS.length+'</b></p>'+
+  '<p>Right first time: '+firstTry+' out of '+p.items.length+'</p>'+
+  '<p>'+p.done+'</p><p>🕘 Now it\'s '+p.after+' am.</p>'+
+  '<button class="go" data-act="home">Go to the home screen</button></div>';
+ $("phone").appendChild(ov);
+}
+
+function renderWin(){
+ S.app=-1; save();
+ $("clock").textContent="8:50"; sbar.className="sbar";
+ scr.className="wall"; scr.style.background="";
+ var cols=["#d4a12a","#c8643b","#5cc77a","#8a9fc8","#fff","#9a6aac"], c='<div class="conf" aria-hidden="true">';
+ for(var i=0;i<60;i++) c+='<i style="left:'+(Math.random()*100).toFixed(1)+'%;background:'+cols[i%cols.length]+';animation-duration:'+(2.2+Math.random()*2.5).toFixed(2)+'s;animation-delay:'+(-Math.random()*4).toFixed(2)+'s"></i>';
+ c+='</div>';
+ var tot=0, max=0, rows='';
+ PUZ.forEach(function(p,i){
+  var sc=S.score[i]||0, n=p.items.length; tot+=sc; max+=n;
+  var st=sc===n?"★★★":sc>=n-2?"★★☆":"★☆☆";
+  rows+='<div class="srow"><span>'+APPS[i].i+' '+APPS[i].n+'</span><span><span class="stars">'+st+'</span> '+sc+'/'+n+'</span></div>';
+ });
+ var pc=tot/max, msg = pc>=0.9?"Amazing work! You're a local already.": pc>=0.7?"Great job! You know your way around.":"Good effort! Play again to beat your score.";
+ scr.innerHTML=c+'<div class="win"><div class="trophy">🎓</div><h2>You\'re in class on time!</h2>'+
+  '<div style="font-size:.85rem">It\'s 8:50. Class starts at 9:00.<br>Skye is saving you a seat. 🪑</div>'+
+  '<div class="card2"><div class="total">Right first time: '+tot+' out of '+max+'</div><p style="text-align:center;margin:6px 0 10px;font-size:.8rem">'+msg+'</p>'+rows+'</div>'+
+  '<div class="card2"><b>Today you can:</b><br>✓ use everyday Australian expressions<br>✓ say suburbs, addresses and postcodes<br>✓ use the simple present and present continuous<br>✓ write a full address in order<br>✓ use a map app<br>✓ read a ferry leaflet and a bus timetable<br>✓ talk about good and bad points of transport</div>'+
+  '<button class="go och" data-act="home" style="margin-top:14px">Back to the home screen</button>'+
+  '<div class="reset"><button data-act="reset" id="rb">↺ Play again from the start</button></div></div>';
+ resetArm=false;
+}
+
+function fsEl(){ return document.fullscreenElement || document.webkitFullscreenElement; }
+function canFS(){ var d=document.documentElement; return !!(d.requestFullscreen || d.webkitRequestFullscreen) && !/iPhone|iPod/.test(navigator.userAgent); }
+function toggleFS(){
+ var d=document.documentElement;
+ try{
+  if(fsEl()){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); return; }
+  var r=(d.requestFullscreen||d.webkitRequestFullscreen).call(d);
+  if(r && r.then) r.then(function(){ try{ screen.orientation.lock("portrait").catch(function(){}); }catch(e){} }).catch(function(){ toast("Full screen is not available here."); });
+ }catch(e){ toast("Full screen is not available here."); }
+}
+if(canFS() && !STANDALONE) $("fsb").hidden=false;
+
+/* ===================== 7. EVENTS ===================== */
+var lastDraw=0;
+new MutationObserver(function(){ lastDraw=Date.now(); }).observe(document.getElementById("scr"),{childList:true});
+document.addEventListener("click",function(e){
+ var t=e.target.closest("[data-act]"); if(!t) return;
+ if(Date.now()-lastDraw<300 && /^(mc|tile|next|search)$/.test(t.getAttribute("data-act"))) return;
+ var act=t.getAttribute("data-act");
+ if(act==="size"){ S.fs=(S.fs+1)%SIZES.length; applySize(); save(); return; }
+ if(act==="key"){ pressKey(t.getAttribute("data-k")); return; }
+ if(act==="open"){ openApp(+t.getAttribute("data-i")); return; }
+ if(act==="home"){ var ov=document.querySelector(".ov"); if(ov) ov.remove(); scr.style.background=""; renderHome(); return; }
+ if(act==="start"){ S.introOK=true; save(); renderApp(); return; }
+ if(act==="mc"){ answerMC(+t.getAttribute("data-d"),t); return; }
+ if(act==="tile"){ tapTile(+t.getAttribute("data-b")); return; }
+ if(act==="undo"){ if(!answered){ placed.pop(); drawOrder(); $("fb").textContent=""; } return; }
+ if(act==="search"){ checkOrder(); return; }
+ if(act==="next"){ nextItem(); return; }
+ if(act==="win"){ renderWin(); return; }
+ if(act==="wbx"){ var w=$("wb"); if(w) w.remove(); return; }
+ if(act==="tipx"){ S.tipDone=true; save(); var tb=$("tipb"); if(tb) tb.remove(); return; }
+ if(act==="fs"){ toggleFS(); return; }
+ if(act==="reset"){
+  if(!resetArm){ resetArm=true; t.textContent="Tap again to start again"; setTimeout(function(){ resetArm=false; var r=$("rb"); if(r) r.textContent="↺ Start the whole game again"; },3000); return; }
+  var fs=S.fs; S=fresh(); S.fs=fs; save(); pin=""; pinWrong=0; SEEN_CHAT=false; renderLock(); return;
+ }
+});
+
+/* ===================== 8. START ===================== */
+if(S.app>=0 && S.curApp<0) S.curApp=S.app;   /* older saves */
+if(!S.prog) S.prog={};
+S.app=-1;
+WELCOME = S.pass && (S.done>0 || S.curApp>=0);
+if(!S.pass) renderLock(); else renderHome();
+})();
+</script>
+</body>
+</html>
